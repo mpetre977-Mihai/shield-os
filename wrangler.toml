@@ -1,6 +1,10 @@
 name = "shield-os"
 compatibility_date = "2025-04-01"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+workers_dev = true
+main = ".open-next/worker.js"
 
-[vars]
-NEXTJS_ENV = "production"
+[assets]
+directory = "./.open-next/assets"
+binding = "ASSETS"
+run_custom_build = "npx opennextjs-cloudflare build"
