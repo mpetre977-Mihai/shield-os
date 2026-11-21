@@ -50,7 +50,7 @@ export default function Home() {
     <main style={{ padding: 24, fontFamily: 'sans-serif', maxWidth: 1100, margin: '0 auto', background: '#f8fafc', minHeight: '100vh' }}>
       <h1 style={{ fontSize: 32, marginBottom: 4 }}>SHIELD OS</h1>
       <p style={{ color: '#475569', marginTop: 0 }}>Revenue + Compliance + Clienti + Operatiuni - EU-first, GDPR + EU AI Act</p>
-      {msg && <div style={{ background: '#dcfce7', padding: 12, borderRadius: 8, marginBottom: 16 }}>{msg}</div>}
+      {msg && <div style={{ background: '#dcfce7', padding: 12, borderRadius: 8, marginBottom: 16, color: '#0f172a' }}>{msg}</div>}
 
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
         <div style={{ background: '#fff', padding: 16, borderRadius: 12, flex: 1, minWidth: 150 }}><b>{clients.length}</b><br />Clienti</div>
@@ -63,10 +63,10 @@ export default function Home() {
         <section style={{ background: '#fff', padding: 16, borderRadius: 12, flex: 1, minWidth: 300 }}>
           <h2>Adauga client</h2>
           <form onSubmit={addClient} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <input value={name} onChange={e => setName(e.target.value)} placeholder="Nume *" style={{ padding: 10, borderRadius: 8, border: '1px solid #cbd5e1' }} />
-            <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" style={{ padding: 10, borderRadius: 8, border: '1px solid #cbd5e1' }} />
-            <input value={company} onChange={e => setCompany(e.target.value)} placeholder="Companie" style={{ padding: 10, borderRadius: 8, border: '1px solid #cbd5e1' }} />
-            <input value={cui} onChange={e => setCui(e.target.value)} placeholder="CUI" style={{ padding: 10, borderRadius: 8, border: '1px solid #cbd5e1' }} />
+            <input value={name} onChange={e => setName(e.target.value)} placeholder="Nume *" style={{ padding: 10, borderRadius: 8, border: '1px solid #cbd5e1', color: '#0f172a', backgroundColor: '#ffffff' }} />
+            <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" style={{ padding: 10, borderRadius: 8, border: '1px solid #cbd5e1', color: '#0f172a', backgroundColor: '#ffffff' }} />
+            <input value={company} onChange={e => setCompany(e.target.value)} placeholder="Companie" style={{ padding: 10, borderRadius: 8, border: '1px solid #cbd5e1', color: '#0f172a', backgroundColor: '#ffffff' }} />
+            <input value={cui} onChange={e => setCui(e.target.value)} placeholder="CUI" style={{ padding: 10, borderRadius: 8, border: '1px solid #cbd5e1', color: '#0f172a', backgroundColor: '#ffffff' }} />
             <button type="submit" style={{ padding: 12, background: '#0f172a', color: '#fff', border: 0, borderRadius: 8, cursor: 'pointer' }}>Salveaza client</button>
           </form>
           <h3 style={{ marginTop: 20 }}>Clienti recenti</h3>
