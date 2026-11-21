@@ -21,6 +21,10 @@ export default function Home() {
       supabase.from('contracts').select('*').order('created_at', { ascending: false }),
       supabase.from('compliance_logs').select('*').order('created_at', { ascending: false }),
     ])
+    if (c.error) setMsg('Eroare clienti: ' + c.error.message)
+    if (i.error) setMsg('Eroare facturi: ' + i.error.message)
+    if (ct.error) setMsg('Eroare contracte: ' + ct.error.message)
+    if (l.error) setMsg('Eroare compliance: ' + l.error.message)
     if (c.data) setClients(c.data)
     if (i.data) setInvoices(i.data)
     if (ct.data) setContracts(ct.data)
