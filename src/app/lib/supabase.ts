@@ -1,8 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Fara process.env, in Workers process poate sa nu existe
-// Cheia Publishable e safe to share publicly, nu e secret
 const supabaseUrl = 'https://kuzzkmldoklkwksokhd.supabase.co'
-const supabaseAnonKey = 'sb_publishable_GXAymGCcwoDuVXtZACNdww_Kn1OkpvG'
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1enprbWxkbG9rbHdrd3Nva2hkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUyODc2MTYsImV4cCI6MjExMDg2MzYxNn0.qtVQYlMzAnMb_1kTuINF37oKRjG2AvOEdUSDFlFggHw'
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
