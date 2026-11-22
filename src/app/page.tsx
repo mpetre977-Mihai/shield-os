@@ -119,11 +119,34 @@ export default function Home() {
     loadAll()
   }
 
+  async function payStripe(inv: any) {
+    setMsg('Se deschide Stripe...')
+    const res = await fetch('/api/stripe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ invoiceId: inv.id, invoiceNumber: inv.number, amount: inv.amount }) })
+    const data = await res.json()
+    if (!res.ok) { setMsg('Eroare plata Stripe: ' + data.error); return }
+    window.location.href = data.url
+  }
+
+  async function genEfactura(inv: any) {
+    const res = await fetch('/api/efactura', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ invoiceId: inv.id }) })
+    const data = await res.json()
+    if (!res.ok) { setMsg('Eroare eFactura: ' + data.error); return }
+    const blob = new Blob([data.xml], { type: 'application/xml' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'eFactura-' + (data.number || 'FACT') + '.xml'
+    a.click()
+    URL.revokeObjectURL(url)
+    setMsg('eFactura generata si descarcata! XML UBL ANAF pentru ' + data.number + '. Incarca fisierul manual in SPV, fara certificat nu se poate trimite automat.')
+    loadAll()
+  }
+
   useEffect(() => { loadAll() }, [])
 
   const inputStyle = { color: '#000', background: '#fff', border: '1px solid #000', padding: '10px', width: '100%', marginBottom: '8px' } as const
   const btnStyle = { padding: '10px', background: '#000', color: '#fff', cursor: 'pointer', marginRight: '10px' } as const
-  const delStyle = { padding: '6px 10px', background: '#fff', color: '#000', border: '1px solid #000', cursor: 'pointer', marginLeft: '10px' } as const
+  const delStyle = { padding: '6px 10px', background: '#fff', color: '#000', border: '1px solid #000', cursor: 'pointer', marginLeft: '6px' } as const
   const boxStyle = { border: '1px solid #000', padding: '12px', marginBottom: '16px' } as const
 
   return (
@@ -144,12 +167,12 @@ export default function Home() {
       </div>
 
       <div style={boxStyle}>
-        <h2>Facturi</h2>
+        <h2>Facturi - Stripe Real + eFactura</h2>
         <input style={inputStyle} placeholder="Numar factura, ex FACT-001" value={invNumber} onChange={e => setInvNumber(e.target.value)} />
         <input style={inputStyle} placeholder="Client" value={invClient} onChange={e => setInvClient(e.target.value)} />
         <input style={inputStyle} placeholder="Suma, ex 97" value={invAmount} onChange={e => setInvAmount(e.target.value)} />
         <button onClick={addInvoice} style={btnStyle}>Adauga factura</button>
-        {invoices.map((x: any) => (<div key={x.id} style={{ border: '1px solid #ccc', padding: '8px', marginTop: '6px', display: 'flex', justifyContent: 'space-between' }}><span>{x.number} - {x.client_name} - {x.amount} EUR - {x.status}</span><button onClick={() => delInvoice(x.id)} style={delStyle}>Sterge</button></div>))}
+        {invoices.map((x: any) => (<div key={x.id} style={{ border: '1px solid #ccc', padding: '8px', marginTop: '6px' }}><div style={{ display: 'flex', justifyContent: 'space-between' }}><span>{x.number} - {x.client_name} - {x.amount} EUR - {x.status} {x.payment_status ? ' | Plata: ' + x.payment_status : ''} {x.efactura_status ? ' | eFactura: ' + x.efactura_status : ''}</span><button onClick={() => delInvoice(x.id)} style={delStyle}>Sterge</button></div><div style={{ marginTop: '6px' }}><button onClick={() => payStripe(x)} style={btnStyle}>Plateste cu Stripe</button><button onClick={() => genEfactura(x)} style={btnStyle}>Genereaza eFactura</button></div></div>))}
       </div>
 
       <div style={boxStyle}>
