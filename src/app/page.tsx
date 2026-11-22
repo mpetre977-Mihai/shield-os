@@ -3,30 +3,70 @@ import { useEffect, useState } from 'react'
 
 export default function Home() {
   const [clients, setClients] = useState<any[]>([])
+  const [invoices, setInvoices] = useState<any[]>([])
+  const [contracts, setContracts] = useState<any[]>([])
+  const [tasks, setTasks] = useState<any[]>([])
   const [msg, setMsg] = useState('')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [company, setCompany] = useState('')
+  const [invNumber, setInvNumber] = useState('')
+  const [invClient, setInvClient] = useState('')
+  const [invAmount, setInvAmount] = useState('')
+  const [conTitle, setConTitle] = useState('')
+  const [conClient, setConClient] = useState('')
+  const [conAmount, setConAmount] = useState('')
+  const [taskTitle, setTaskTitle] = useState('')
 
-  async function loadData() {
+  async function loadAll() {
     try {
-      const res = await fetch('/api/clients')
-      const data = await res.json()
-      if (!res.ok) { setMsg('Eroare: ' + (data.error || 'Eroare server')); setClients([]); return }
-      setClients(data)
-      setMsg('OK, clienti incarcati: ' + data.length)
-    } catch (e: any) {
-      setMsg('Eroare retea: ' + e.message)
-    }
+      const [r1, r2, r3, r4] = await Promise.all([fetch('/api/clients'), fetch('/api/invoices'), fetch('/api/contracts'), fetch('/api/tasks')])
+      const c = await r1.json()
+      const i = await r2.json()
+      const co = await r3.json()
+      const t = await r4.json()
+      setClients(Array.isArray(c) ? c : [])
+      setInvoices(Array.isArray(i) ? i : [])
+      setContracts(Array.isArray(co) ? co : [])
+      setTasks(Array.isArray(t) ? t : [])
+      setMsg('OK, incarcate: Clienti ' + (Array.isArray(c) ? c.length : 0) + ', Facturi ' + (Array.isArray(i) ? i.length : 0) + ', Contracte ' + (Array.isArray(co) ? co.length : 0) + ', Tasks ' + (Array.isArray(t) ? t.length : 0))
+    } catch (e: any) { setMsg('Eroare retea: ' + e.message) }
   }
 
   async function addClient() {
     const res = await fetch('/api/clients', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, company }) })
     const data = await res.json()
-    if (!res.ok) { setMsg('Eroare adaugare: ' + data.error); return }
+    if (!res.ok) { setMsg('Eroare adaugare client: ' + data.error); return }
     setMsg('Client adaugat!')
     setName(''); setEmail(''); setCompany('')
-    loadData()
+    loadAll()
+  }
+
+  async function addInvoice() {
+    const res = await fetch('/api/invoices', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ number: invNumber, client_name: invClient, amount: invAmount, status: 'draft' }) })
+    const data = await res.json()
+    if (!res.ok) { setMsg('Eroare factura: ' + data.error); return }
+    setMsg('Factura adaugata!')
+    setInvNumber(''); setInvClient(''); setInvAmount('')
+    loadAll()
+  }
+
+  async function addContract() {
+    const res = await fetch('/api/contracts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: conTitle, client_name: conClient, amount: conAmount, status: 'draft' }) })
+    const data = await res.json()
+    if (!res.ok) { setMsg('Eroare contract: ' + data.error); return }
+    setMsg('Contract adaugat!')
+    setConTitle(''); setConClient(''); setConAmount('')
+    loadAll()
+  }
+
+  async function addTask() {
+    const res = await fetch('/api/tasks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: taskTitle, status: 'todo' }) })
+    const data = await res.json()
+    if (!res.ok) { setMsg('Eroare task: ' + data.error); return }
+    setMsg('Task adaugat!')
+    setTaskTitle('')
+    loadAll()
   }
 
   async function genDPA() {
@@ -36,27 +76,52 @@ export default function Home() {
     setMsg('DPA generat!')
   }
 
-  useEffect(() => { loadData() }, [])
+  useEffect(() => { loadAll() }, [])
 
   const inputStyle = { color: '#000', background: '#fff', border: '1px solid #000', padding: '10px', width: '100%', marginBottom: '8px' } as const
+  const btnStyle = { padding: '10px', background: '#000', color: '#fff', cursor: 'pointer', marginRight: '10px' } as const
+  const boxStyle = { border: '1px solid #000', padding: '12px', marginBottom: '16px' } as const
 
   return (
-    <main style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '800px', margin: '0 auto', background: '#fff', color: '#000', minHeight: '100vh' }}>
+    <main style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '900px', margin: '0 auto', background: '#fff', color: '#000', minHeight: '100vh' }}>
       <h1>SHIELD OS</h1>
-      <p><b>Clienti:</b> {clients.length}</p>
+      <p><b>Clienti:</b> {clients.length} | <b>Facturi:</b> {invoices.length} | <b>Contracte:</b> {contracts.length} | <b>Tasks:</b> {tasks.length}</p>
       <p><b>Mesaj:</b> {msg}</p>
-      <h2>Adauga client</h2>
-      <input style={inputStyle} placeholder="Nume" value={name} onChange={e => setName(e.target.value)} />
-      <input style={inputStyle} placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-      <input style={inputStyle} placeholder="Companie" value={company} onChange={e => setCompany(e.target.value)} />
-      <button onClick={addClient} style={{ padding: '10px', background: '#000', color: '#fff', cursor: 'pointer', marginRight: '10px' }}>Adauga client</button>
-      <button onClick={genDPA} style={{ padding: '10px', background: '#000', color: '#fff', cursor: 'pointer' }}>Genereaza DPA</button>
-      <h2>Lista clienti</h2>
-      {clients.map((c: any) => (
-        <div key={c.id} style={{ border: '1px solid #ccc', padding: '8px', marginBottom: '6px' }}>
-          {c.name} - {c.email} - {c.company}
-        </div>
-      ))}
+
+      <div style={boxStyle}>
+        <h2>Clienti</h2>
+        <input style={inputStyle} placeholder="Nume" value={name} onChange={e => setName(e.target.value)} />
+        <input style={inputStyle} placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
+        <input style={inputStyle} placeholder="Companie" value={company} onChange={e => setCompany(e.target.value)} />
+        <button onClick={addClient} style={btnStyle}>Adauga client</button>
+        <button onClick={genDPA} style={btnStyle}>Genereaza DPA</button>
+        {clients.map((c: any) => (<div key={c.id} style={{ border: '1px solid #ccc', padding: '8px', marginTop: '6px' }}>{c.name} - {c.email} - {c.company}</div>))}
+      </div>
+
+      <div style={boxStyle}>
+        <h2>Facturi</h2>
+        <input style={inputStyle} placeholder="Numar factura, ex FACT-001" value={invNumber} onChange={e => setInvNumber(e.target.value)} />
+        <input style={inputStyle} placeholder="Client" value={invClient} onChange={e => setInvClient(e.target.value)} />
+        <input style={inputStyle} placeholder="Suma, ex 97" value={invAmount} onChange={e => setInvAmount(e.target.value)} />
+        <button onClick={addInvoice} style={btnStyle}>Adauga factura</button>
+        {invoices.map((x: any) => (<div key={x.id} style={{ border: '1px solid #ccc', padding: '8px', marginTop: '6px' }}>{x.number} - {x.client_name} - {x.amount} EUR - {x.status}</div>))}
+      </div>
+
+      <div style={boxStyle}>
+        <h2>Contracte</h2>
+        <input style={inputStyle} placeholder="Titlu contract" value={conTitle} onChange={e => setConTitle(e.target.value)} />
+        <input style={inputStyle} placeholder="Client" value={conClient} onChange={e => setConClient(e.target.value)} />
+        <input style={inputStyle} placeholder="Suma, ex 297" value={conAmount} onChange={e => setConAmount(e.target.value)} />
+        <button onClick={addContract} style={btnStyle}>Adauga contract</button>
+        {contracts.map((x: any) => (<div key={x.id} style={{ border: '1px solid #ccc', padding: '8px', marginTop: '6px' }}>{x.title} - {x.client_name} - {x.amount} EUR - {x.status}</div>))}
+      </div>
+
+      <div style={boxStyle}>
+        <h2>Tasks</h2>
+        <input style={inputStyle} placeholder="Titlu task, ex Suna clientul" value={taskTitle} onChange={e => setTaskTitle(e.target.value)} />
+        <button onClick={addTask} style={btnStyle}>Adauga task</button>
+        {tasks.map((x: any) => (<div key={x.id} style={{ border: '1px solid #ccc', padding: '8px', marginTop: '6px' }}>{x.title} - {x.status}</div>))}
+      </div>
     </main>
   )
 }
