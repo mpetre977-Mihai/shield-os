@@ -29,7 +29,7 @@ export default function Home() {
       setInvoices(Array.isArray(i) ? i : [])
       setContracts(Array.isArray(co) ? co : [])
       setTasks(Array.isArray(t) ? t : [])
-      setMsg('OK, incarcate: Clienti ' + (Array.isArray(c) ? c.length : 0) + ', Facturi ' + (Array.isArray(i) ? i.length : 0) + ', Contracte ' + (Array.isArray(co) ? co.length : 0) + ', Tasks ' + (Array.isArray(t) ? t.length : 0))
+      setMsg('OK: Clienti ' + (Array.isArray(c) ? c.length : 0) + ', Facturi ' + (Array.isArray(i) ? i.length : 0) + ', Contracte ' + (Array.isArray(co) ? co.length : 0) + ', Tasks ' + (Array.isArray(t) ? t.length : 0))
     } catch (e: any) { setMsg('Eroare retea: ' + e.message) }
   }
 
@@ -76,10 +76,54 @@ export default function Home() {
     setMsg('DPA generat!')
   }
 
+  async function genDPIA() {
+    const res = await fetch('/api/dpia', { method: 'POST' })
+    const data = await res.json()
+    if (!res.ok) { setMsg('Eroare DPIA: ' + data.error); return }
+    setMsg('DPIA generat!')
+  }
+
+  async function delClient(id: string) {
+    if (!confirm('Stergi acest client?')) return
+    const res = await fetch('/api/clients?id=' + id, { method: 'DELETE' })
+    const data = await res.json()
+    if (!res.ok) { setMsg('Eroare stergere: ' + data.error); return }
+    setMsg('Client sters!')
+    loadAll()
+  }
+
+  async function delInvoice(id: string) {
+    if (!confirm('Stergi aceasta factura?')) return
+    const res = await fetch('/api/invoices?id=' + id, { method: 'DELETE' })
+    const data = await res.json()
+    if (!res.ok) { setMsg('Eroare stergere: ' + data.error); return }
+    setMsg('Factura stearsa!')
+    loadAll()
+  }
+
+  async function delContract(id: string) {
+    if (!confirm('Stergi acest contract?')) return
+    const res = await fetch('/api/contracts?id=' + id, { method: 'DELETE' })
+    const data = await res.json()
+    if (!res.ok) { setMsg('Eroare stergere: ' + data.error); return }
+    setMsg('Contract sters!')
+    loadAll()
+  }
+
+  async function delTask(id: string) {
+    if (!confirm('Stergi acest task?')) return
+    const res = await fetch('/api/tasks?id=' + id, { method: 'DELETE' })
+    const data = await res.json()
+    if (!res.ok) { setMsg('Eroare stergere: ' + data.error); return }
+    setMsg('Task sters!')
+    loadAll()
+  }
+
   useEffect(() => { loadAll() }, [])
 
   const inputStyle = { color: '#000', background: '#fff', border: '1px solid #000', padding: '10px', width: '100%', marginBottom: '8px' } as const
   const btnStyle = { padding: '10px', background: '#000', color: '#fff', cursor: 'pointer', marginRight: '10px' } as const
+  const delStyle = { padding: '6px 10px', background: '#fff', color: '#000', border: '1px solid #000', cursor: 'pointer', marginLeft: '10px' } as const
   const boxStyle = { border: '1px solid #000', padding: '12px', marginBottom: '16px' } as const
 
   return (
@@ -95,7 +139,8 @@ export default function Home() {
         <input style={inputStyle} placeholder="Companie" value={company} onChange={e => setCompany(e.target.value)} />
         <button onClick={addClient} style={btnStyle}>Adauga client</button>
         <button onClick={genDPA} style={btnStyle}>Genereaza DPA</button>
-        {clients.map((c: any) => (<div key={c.id} style={{ border: '1px solid #ccc', padding: '8px', marginTop: '6px' }}>{c.name} - {c.email} - {c.company}</div>))}
+        <button onClick={genDPIA} style={btnStyle}>Genereaza DPIA</button>
+        {clients.map((c: any) => (<div key={c.id} style={{ border: '1px solid #ccc', padding: '8px', marginTop: '6px', display: 'flex', justifyContent: 'space-between' }}><span>{c.name} - {c.email} - {c.company}</span><button onClick={() => delClient(c.id)} style={delStyle}>Sterge</button></div>))}
       </div>
 
       <div style={boxStyle}>
@@ -104,7 +149,7 @@ export default function Home() {
         <input style={inputStyle} placeholder="Client" value={invClient} onChange={e => setInvClient(e.target.value)} />
         <input style={inputStyle} placeholder="Suma, ex 97" value={invAmount} onChange={e => setInvAmount(e.target.value)} />
         <button onClick={addInvoice} style={btnStyle}>Adauga factura</button>
-        {invoices.map((x: any) => (<div key={x.id} style={{ border: '1px solid #ccc', padding: '8px', marginTop: '6px' }}>{x.number} - {x.client_name} - {x.amount} EUR - {x.status}</div>))}
+        {invoices.map((x: any) => (<div key={x.id} style={{ border: '1px solid #ccc', padding: '8px', marginTop: '6px', display: 'flex', justifyContent: 'space-between' }}><span>{x.number} - {x.client_name} - {x.amount} EUR - {x.status}</span><button onClick={() => delInvoice(x.id)} style={delStyle}>Sterge</button></div>))}
       </div>
 
       <div style={boxStyle}>
@@ -113,14 +158,14 @@ export default function Home() {
         <input style={inputStyle} placeholder="Client" value={conClient} onChange={e => setConClient(e.target.value)} />
         <input style={inputStyle} placeholder="Suma, ex 297" value={conAmount} onChange={e => setConAmount(e.target.value)} />
         <button onClick={addContract} style={btnStyle}>Adauga contract</button>
-        {contracts.map((x: any) => (<div key={x.id} style={{ border: '1px solid #ccc', padding: '8px', marginTop: '6px' }}>{x.title} - {x.client_name} - {x.amount} EUR - {x.status}</div>))}
+        {contracts.map((x: any) => (<div key={x.id} style={{ border: '1px solid #ccc', padding: '8px', marginTop: '6px', display: 'flex', justifyContent: 'space-between' }}><span>{x.title} - {x.client_name} - {x.amount} EUR - {x.status}</span><button onClick={() => delContract(x.id)} style={delStyle}>Sterge</button></div>))}
       </div>
 
       <div style={boxStyle}>
         <h2>Tasks</h2>
         <input style={inputStyle} placeholder="Titlu task, ex Suna clientul" value={taskTitle} onChange={e => setTaskTitle(e.target.value)} />
         <button onClick={addTask} style={btnStyle}>Adauga task</button>
-        {tasks.map((x: any) => (<div key={x.id} style={{ border: '1px solid #ccc', padding: '8px', marginTop: '6px' }}>{x.title} - {x.status}</div>))}
+        {tasks.map((x: any) => (<div key={x.id} style={{ border: '1px solid #ccc', padding: '8px', marginTop: '6px', display: 'flex', justifyContent: 'space-between' }}><span>{x.title} - {x.status}</span><button onClick={() => delTask(x.id)} style={delStyle}>Sterge</button></div>))}
       </div>
     </main>
   )
