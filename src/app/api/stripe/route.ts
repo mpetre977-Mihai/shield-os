@@ -11,8 +11,10 @@ export async function POST(req: Request) {
   params.append('mode', 'payment')
   params.append('success_url', 'https://shield-os-eight.vercel.app/?plata=succes')
   params.append('cancel_url', 'https://shield-os-eight.vercel.app/?plata=anulata')
+  params.append('managed_payments[enabled]', 'false')
   params.append('line_items[0][price_data][currency]', 'eur')
   params.append('line_items[0][price_data][product_data][name]', 'SHIELD OS - ' + invoiceNumber)
+  params.append('line_items[0][price_data][product_data][tax_code]', 'txcd_10000000')
   params.append('line_items[0][price_data][unit_amount]', String(Math.round(amount * 100)))
   params.append('line_items[0][quantity]', '1')
 
